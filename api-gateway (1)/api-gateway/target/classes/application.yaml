@@ -1,0 +1,182 @@
+spring:
+  application:
+    name: api-gateway
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/api_gateway_db
+    username: postgres
+    password: admin123
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  cloud:
+    gateway:
+      server:
+        webmvc:
+
+          # ============================
+          # Gateway Routes
+          # ============================
+          routes:
+
+            # User Service
+            - id: user-service
+              uri: lb://USER-SERVICE
+              predicates:
+                - Path=/api/users/**
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: userServiceCircuitBreaker
+                    fallbackUri: forward:/fallback/user
+
+            # Product Service
+            - id: product-service
+              uri: lb://PRODUCT-SERVICE
+              predicates:
+                - Path=/api/products/**
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: productServiceCircuitBreaker
+                    fallbackUri: forward:/fallback/product
+
+            # Cart Service
+            - id: cart-service
+              uri: lb://CART-SERVICE
+              predicates:
+                - Path=/api/cart/**
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: cartServiceCircuitBreaker
+                    fallbackUri: forward:/fallback/cart
+
+            # Order Service
+            - id: order-service
+              uri: lb://ORDER-SERVICE
+              predicates:
+                - Path=/api/orders/**
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: orderServiceCircuitBreaker
+                    fallbackUri: forward:/fallback/order
+
+            # Payment Service
+            - id: payment-service
+              uri: lb://PAYMENT-SERVICE
+              predicates:
+                - Path=/api/payments/**
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: paymentServiceCircuitBreaker
+                    fallbackUri: forward:/fallback/payment
+
+            # OTP Service
+            - id: otp-service
+              uri: lb://OTP-SERVICE
+              predicates:
+                - Path=/api/otp/**
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: otpServiceCircuitBreaker
+                    fallbackUri: forward:/fallback/otp
+
+          # ============================
+          # Gateway HTTP Client Timeout
+          # ============================
+          httpclient:
+            connect-timeout: 2000
+            response-timeout: 5s
+
+
+# ============================
+# Server
+# ============================
+server:
+  port: 8080
+
+
+# ============================
+# Eureka Client
+# ============================
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+
+
+# ============================
+# JWT
+# ============================
+jwt:
+  secret: ${JWT_SECRET:my-super-secret-key-1234567890123456}
+
+
+# ============================
+# Resilience4j Circuit Breaker
+# ============================
+resilience4j:
+  circuitbreaker:
+    instances:
+
+      userServiceCircuitBreaker:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3
+
+      productServiceCircuitBreaker:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3
+
+      cartServiceCircuitBreaker:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3
+
+      orderServiceCircuitBreaker:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3
+
+      paymentServiceCircuitBreaker:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3
+
+      otpServiceCircuitBreaker:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3
+
+
+# ============================
+# Actuator
+# ============================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+
+auth:
+  test:
+    username: ${TEST_USERNAME:}
+    password: ${TEST_PASSWORD:}
