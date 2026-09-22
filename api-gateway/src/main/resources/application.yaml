@@ -11,6 +11,7 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+
   data:
     redis:
       host: localhost
@@ -20,15 +21,11 @@ spring:
     gateway:
       server:
         webmvc:
-
-          # ============================
-          # Gateway Routes
-          # ============================
           routes:
 
             # User Service
             - id: user-service
-              uri: lb://USER-SERVICE
+              uri: http://localhost:8082
               predicates:
                 - Path=/api/users/**
               filters:
@@ -39,7 +36,7 @@ spring:
 
             # Product Service
             - id: product-service
-              uri: lb://PRODUCT-SERVICE
+              uri: http://localhost:8081
               predicates:
                 - Path=/api/products/**
               filters:
@@ -50,7 +47,7 @@ spring:
 
             # Cart Service
             - id: cart-service
-              uri: lb://CART-SERVICE
+              uri: http://localhost:8083
               predicates:
                 - Path=/api/cart/**
               filters:
@@ -61,7 +58,7 @@ spring:
 
             # Order Service
             - id: order-service
-              uri: lb://ORDER-SERVICE
+              uri: http://localhost:8084
               predicates:
                 - Path=/api/orders/**
               filters:
@@ -72,7 +69,7 @@ spring:
 
             # Payment Service
             - id: payment-service
-              uri: lb://PAYMENT-SERVICE
+              uri: http://localhost:8085
               predicates:
                 - Path=/api/payments/**
               filters:
@@ -83,7 +80,7 @@ spring:
 
             # OTP Service
             - id: otp-service
-              uri: lb://OTP-SERVICE
+              uri: http://localhost:8086
               predicates:
                 - Path=/api/otp/**
               filters:
@@ -92,40 +89,26 @@ spring:
                     name: otpServiceCircuitBreaker
                     fallbackUri: forward:/fallback/otp
 
-          # ============================
-          # Gateway HTTP Client Timeout
-          # ============================
           httpclient:
             connect-timeout: 2000
             response-timeout: 5s
 
 
-# ============================
-# Server
-# ============================
 server:
   port: 8080
 
 
-# ============================
-# Eureka Client
-# ============================
-eureka:
-  client:
-    service-url:
-      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+# Product Service URL used by Feign
+product-service:
+  url: http://localhost:8081
 
 
-# ============================
 # JWT
-# ============================
 jwt:
   secret: ${JWT_SECRET:my-super-secret-key-1234567890123456}
 
 
-# ============================
-# Resilience4j Circuit Breaker
-# ============================
+# Resilience4j
 resilience4j:
   circuitbreaker:
     instances:
@@ -167,14 +150,12 @@ resilience4j:
         permittedNumberOfCallsInHalfOpenState: 3
 
 
-# ============================
-# Actuator
-# ============================
 management:
   endpoints:
     web:
       exposure:
         include: health,info,metrics,prometheus
+
 
 auth:
   test:
