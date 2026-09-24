@@ -1,0 +1,25 @@
+server:
+  port: 8082
+
+
+
+spring:
+  application:
+    name: user-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ordermvp-servicedb
+    username: postgres
+    password: admin
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+jwt:
+  secret: "my-super-secret-key-for-telecom-user-service-jwt-2026"
+  expiration: 86400000
