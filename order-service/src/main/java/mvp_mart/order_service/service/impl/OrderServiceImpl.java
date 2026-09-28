@@ -1,6 +1,9 @@
 package mvp_mart.order_service.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import mvp_mart.order_service.client.CartServiceClient;
+import mvp_mart.order_service.dto.CartItemResponse;
+import mvp_mart.order_service.dto.CreateOrderFromCartRequest;
 import mvp_mart.order_service.dto.CreateOrderRequest;
 import mvp_mart.order_service.dto.OrderItemRequest;
 import mvp_mart.order_service.dto.OrderItemResponse;
@@ -16,13 +19,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class OrderServiceImpl implements OrderService {
+
     private final OrderRepository orderRepository;
+    private final CartServiceClient cartServiceClient;
 
 
     // =========================================================
@@ -73,6 +79,72 @@ public class OrderServiceImpl implements OrderService {
         Order savedOrder = orderRepository.save(order);
 
         return mapToResponse(savedOrder);
+    }
+
+
+    // =========================================================
+    // CREATE ORDER FROM CART
+    // =========================================================
+
+    @Override
+    public OrderResponse createOrderFromCart(
+            Long userId,
+            CreateOrderFromCartRequest request
+    ) {
+
+        // Get items from Cart Service
+        List<CartItemResponse> cartItems =
+                cartServiceClient.getCartItems(userId);
+
+        // Check if cart is empty
+        if (cartItems == null || cartItems.isEmpty()) {
+            throw new IllegalStateException("Cart is empty");
+        }
+
+        // Convert CartItem objects into OrderItemRequest objects
+        List<OrderItemRequest> orderItems = new ArrayList<>();
+
+        for (CartItemResponse cartItem : cartItems) {
+
+            OrderItemRequest item = new OrderItemRequest();
+
+            item.setProductId(
+                    Long.valueOf(cartItem.getProductId())
+            );
+
+            item.setProductName(
+                    cartItem.getName()
+            );
+
+            item.setQuantity(
+                    cartItem.getQuantity()
+            );
+
+            item.setUnitPrice(
+                    BigDecimal.valueOf(cartItem.getPrice())
+            );
+
+            orderItems.add(item);
+        }
+
+        // Create the request for the existing createOrder() method
+        CreateOrderRequest createOrderRequest =
+                new CreateOrderRequest();
+
+        createOrderRequest.setShippingAddress(
+                request.getShippingAddress()
+        );
+
+        createOrderRequest.setItems(orderItems);
+
+        // Reuse existing order creation logic
+        OrderResponse response =
+                createOrder(userId, createOrderRequest);
+
+        // Clear cart after successful order creation
+        cartServiceClient.clearCart(userId);
+
+        return response;
     }
 
 
