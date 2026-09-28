@@ -1,3 +1,5 @@
 target/
 *.log
 cart-service/.mvn/
+.idea/
+HELP.md
