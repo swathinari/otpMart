@@ -3,11 +3,14 @@ package com.otpmart.cart.controller;
 import com.otpmart.cart.dto.AddItemRequest;
 import com.otpmart.cart.dto.CartResponse;
 import com.otpmart.cart.entity.Cart;
+import com.otpmart.cart.entity.CartItem;
 import com.otpmart.cart.service.CartService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/cart")
@@ -19,9 +22,9 @@ public class CartController {
         this.cartService = cartService;
     }
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<Cart> getCart(@PathVariable String userId) {
-        return ResponseEntity.ok(cartService.getCart(userId));
+    @GetMapping("/{userId}/items")
+    public ResponseEntity<List<CartItem>> getItems(@PathVariable String userId) {
+        return ResponseEntity.ok(cartService.getCart(userId).getItems());
     }
 
     @PostMapping("/{userId}/items")
