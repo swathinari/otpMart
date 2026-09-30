@@ -9,6 +9,7 @@ import mvp_mart.order_service.service.OrderService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import mvp_mart.order_service.dto.CreateOrderFromCartRequest;
 
 import java.util.List;
 
@@ -32,6 +33,22 @@ public class OrderController {
 
         OrderResponse response =
                 orderService.createOrder(
+                        userId,
+                        request
+                );
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(response);
+    }
+    @PostMapping("/from-cart")
+    public ResponseEntity<OrderResponse> createOrderFromCart(
+            @RequestHeader("X-User-Id") Long userId,
+            @Valid @RequestBody CreateOrderFromCartRequest request
+    ) {
+
+        OrderResponse response =
+                orderService.createOrderFromCart(
                         userId,
                         request
                 );

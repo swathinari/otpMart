@@ -5,6 +5,7 @@ package mvp_mart.order_service.service;
 import mvp_mart.order_service.dto.CreateOrderRequest;
 import mvp_mart.order_service.dto.OrderResponse;
 import mvp_mart.order_service.dto.UpdateOrderStatusRequest;
+import mvp_mart.order_service.dto.CreateOrderFromCartRequest;
 
 import java.util.List;
 
@@ -13,6 +14,10 @@ public interface OrderService {
     OrderResponse createOrder(
             Long userId,
             CreateOrderRequest request
+    );
+    OrderResponse createOrderFromCart(
+            Long userId,
+            CreateOrderFromCartRequest request
     );
 
     OrderResponse getOrderById(
