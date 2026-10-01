@@ -5,7 +5,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/api_gateway_db
     username: postgres
-    password: admin123
+    password: admin
 
   jpa:
     hibernate:
@@ -40,11 +40,10 @@ spring:
               predicates:
                 - Path=/api/products/**
               filters:
-                - name: CircuitBreaker
-                  args:
-                    name: productServiceCircuitBreaker
-                    fallbackUri: forward:/fallback/product
-
+                - CircuitBreaker=productServiceCircuitBreaker
+#                  args:
+#                    name: productServiceCircuitBreaker
+#                    fallbackUri: forward:/fallback/product
             # Cart Service
             - id: cart-service
               uri: http://localhost:8083
@@ -53,7 +52,7 @@ spring:
               filters:
                 - name: CircuitBreaker
                   args:
-                    name: cartServiceCircuitBreaker
+                    id: cartServiceCircuitBreaker
                     fallbackUri: forward:/fallback/cart
 
             # Order Service
